@@ -15,8 +15,8 @@
             }
 
             #editor {
-                font-family: consolas,'Ubuntu Mono','Monaco','Menlo',source-code-pro, monospace;
-                font-size: 18px;
+                font-family: consolas,'Ubuntu Mono','Monaco','Menlo',source-code-pro,monospace;
+                font-size: 17px;
             }
 
         </style>
@@ -25,9 +25,8 @@
     </head> 
 
     <body>
-        <div id="editor">
+<div id="editor">
 doctype 5
-
 html(lang='en')
 
     head
@@ -39,7 +38,7 @@ html(lang='en')
 
     body
         h1 Jade - node template engine
-        #container.col
+        .col
             if youAreUsingJade
                 p You are awesome
             else
@@ -49,7 +48,6 @@ html(lang='en')
                 |templating language with a
                 |strong focus on performance
                 |and powerful features.
-
 </div>
         <script>
             var editor= ace.edit('editor');
