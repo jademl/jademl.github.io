@@ -1,4 +1,0 @@
-jademl.org
-==========
-
-index.jade
