@@ -1,1 +1,62 @@
-It works.
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <style>
+
+            html, body {
+                margin: 0; padding: 0;
+            }
+
+            html, body, #editor {
+                position: absolute;
+                width: 100%; height: 100%
+            }
+
+            #editor {
+                font-family: consolas,'Ubuntu Mono','Monaco','Menlo',source-code-pro, monospace;
+                font-size: 18px;
+            }
+
+        </style>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.01/ace.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.01/mode-jade.js"></script>
+    </head> 
+
+    <body>
+        <div id="editor">
+doctype 5
+
+html(lang='en')
+
+    head
+        title= pageTitle
+        script(type='text/javascript').
+            if (foo) {
+                bar(1 + 5)
+            }
+
+    body
+        h1 Jade - node template engine
+        #container.col
+            if youAreUsingJade
+                p You are awesome
+            else
+                p Get on it!
+            p
+                |Jade is a terse and simple
+                |templating language with a
+                |strong focus on performance
+                |and powerful features.
+
+</div>
+        <script>
+            var editor= ace.edit('editor');
+
+            editor.setTheme('ace/theme/monokai');
+            editor.getSession().setMode('ace/mode/jade');
+        </script>
+    </body>
+
+</html>
