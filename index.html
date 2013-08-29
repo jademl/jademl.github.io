@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en", ng-app="jademl">
 
     <head>
         <meta charset="utf-8">
@@ -9,33 +9,153 @@
                 margin: 0; padding: 0;
             }
 
-            html, body, #editor {
+            html, body, .editor {
                 position: absolute;
                 width: 100%; height: 100%
             }
 
-            #editor {
+            #jade, #html {
+                position: absolute;
                 font-family: consolas,'Ubuntu Mono','Monaco','Menlo',source-code-pro,monospace;
                 font-size: 17px;
             }
+            #jade {
+                z-index:9;
+                top:0; left:0;
+                width:50%;
+                //border-bottom: 2px solid #2F3129;
+                //box-shadow: 0 0 137px 1px black;
+            }
+            #html {
+                z-index:7;
+                top:0; left:50%;
+                width:50%;
+                //border-bottom: 2px solid #2F3129;
+                //box-shadow: 0 0 137px 1px black;
+            }
 
         </style>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.01/ace.js"></script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.01/mode-jade.js"></script>
+        <script src='http://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular.min.js'></script>
+
+        <script src='http://cdnjs.cloudflare.com/ajax/libs/jade/0.27.7/jade.js'></script>
+
+        <script src='http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.01/ace.js'></script>
+        <script src='http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.01/mode-jade.js'></script>
+        <script src='http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.01/mode-html.js'></script>
+
+        <script>
+        var app= angular.module('jademl', [])
+
+        app.factory('$jade', function () {
+            return jade
+        })
+
+        app.controller('AppCtrl', ['$scope', function ($scope) {
+
+            $scope.data= {title:'jademl.org', youAreUsingJade:true}
+
+            $scope.jade= ''
+            $scope.html= ''
+
+            $scope.setJade= function (value) { console.log('Jade!')
+                $scope.jade= value
+
+                $scope.html= jade.compile(value, {pretty:true, doctype:'5'})(
+                    $scope.data
+                )
+
+                $scope.$broadcast('html', $scope.html)
+            }
+
+        }])
+
+        app.controller('JadeEditorCtrl', ['$q', '$scope', '$jade', function ($q, $scope, $jade) {
+
+            $dfd= $q.defer()
+            $scope.editor= $dfd.promise
+            this.setEditor= function (editor) {
+                editor.getSession().setMode('ace/mode/jade')
+                $dfd.resolve(editor)
+            }
+
+            this.setValue= function (value) {
+                console.log('jade value')
+                $scope.setJade(value)
+            }
+
+        }])
+
+        app.controller('HtmlEditorCtrl', ['$q', '$scope', '$jade', function ($q, $scope, $jade) {
+
+
+            $dfd= $q.defer()
+            this.setEditor= function (editor) {
+                editor.getSession().setMode('ace/mode/html')
+                console.log('sess', editor.getSession())
+                editor.setReadOnly(true)
+                editor.setHighlightActiveLine(false)
+                $dfd.resolve(editor)
+            }
+
+            $scope.editor= $dfd.promise
+
+            $scope.editor.then(function (editor) {
+                $scope.$on('html', function (evt, html) {
+                    console.log('html!', html)
+                    editor.setValue(html)
+                    editor.getSession().selection.clearSelection()
+                })
+            })
+
+            this.setValue= function (value) {
+            }
+
+        }])
+
+        app.directive('ace', ['$q', '$timeout', function ($q, $timeout) {
+            return {
+                restrict: 'A',
+                require: 'ngController',
+
+                link: function ($scope, e, a, ngController) {
+                    console.log('link ace', ngController)
+                    var e= e[0]
+
+                    var editor= null
+                    ngController.setEditor(
+                        editor= ace.edit(e)
+                    )
+
+                    //editor.setTheme('ace/theme/monokai')
+
+                    $timeout(function () {
+                        ngController.setValue(
+                            editor.getValue()
+                        )
+                    })
+                    editor.on('change', function () {
+                        console.log('change')
+                        ngController.setValue(
+                            editor.getValue()
+                        )
+                    })
+                }
+            }
+        }])
+        </script>
     </head> 
 
-    <body>
-<div id="editor">
-doctype 5
+    <body ng-controller="AppCtrl">
+
+<div id="jade" class="editor" ng-controller="JadeEditorCtrl" ace>doctype 5
 html(lang='en')
 
     head
-        title= pageTitle
-        script(type='text/javascript').
+        title title
+        script.
             if (foo) {
                 bar(1 + 5)
             }
-
     body
         h1 Jade - node template engine
         .col
@@ -49,12 +169,10 @@ html(lang='en')
                 |strong focus on performance
                 |and powerful features.
 </div>
-        <script>
-            var editor= ace.edit('editor');
 
-            editor.setTheme('ace/theme/monokai');
-            editor.getSession().setMode('ace/mode/jade');
-        </script>
+<div id="html" class="editor" ng-controller="HtmlEditorCtrl" ace></div>
+<div>{{jade}}</div>
+<div>{{html}}</div>
     </body>
 
 </html>
